@@ -9,10 +9,13 @@ import (
 
 type BigQueryStore struct {
 	client *bigquery.Client
+	cfg    BigQueryStoreConfig
 }
 
 type BigQueryStoreConfig struct {
-	ProjectID string
+	ProjectID            string
+	RawDatasetID         string
+	TransformedDatasetID string
 }
 
 func NewBigQueryStore(ctx context.Context, cfg BigQueryStoreConfig) (*BigQueryStore, error) {
@@ -20,7 +23,7 @@ func NewBigQueryStore(ctx context.Context, cfg BigQueryStoreConfig) (*BigQuerySt
 	if err != nil {
 		return nil, err
 	}
-	return &BigQueryStore{client: client}, nil
+	return &BigQueryStore{client: client, cfg: cfg}, nil
 }
 
 func (s *BigQueryStore) Load(ctx context.Context, data schema.RawData) error {
