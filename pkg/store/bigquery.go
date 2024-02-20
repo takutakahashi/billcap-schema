@@ -13,9 +13,14 @@ type BigQueryStore struct {
 }
 
 type BigQueryStoreConfig struct {
-	ProjectID            string
-	RawDatasetID         string
-	TransformedDatasetID string
+	ProjectID   string
+	Raw         BigQueryDatabase
+	Transformed BigQueryDatabase
+}
+
+type BigQueryDatabase struct {
+	DatasetID string
+	TableID   string
 }
 
 func NewBigQueryStore(ctx context.Context, cfg BigQueryStoreConfig) (*BigQueryStore, error) {
@@ -26,12 +31,32 @@ func NewBigQueryStore(ctx context.Context, cfg BigQueryStoreConfig) (*BigQuerySt
 	return &BigQueryStore{client: client, cfg: cfg}, nil
 }
 
-func (s *BigQueryStore) Load(ctx context.Context, data schema.RawData) error {
+func (s *BigQueryStore) Load(ctx context.Context, data []schema.RawData) error {
+	inserter := s.client.Dataset(s.cfg.Raw.DatasetID).Table(s.cfg.Raw.DatasetID).Inserter()
+	if err := inserter.Put(ctx, data); err != nil {
+		return err
+	}
 	return nil
+
 }
 
 func (s *BigQueryStore) Transform(ctx context.Context) ([]schema.TransformedData, error) {
-	return nil, nil
+	transformQuery := `
+
+	`
+	job, err := s.client.Query(transformQuery).Read(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var transformedData []schema.TransformedData
+	for {
+		var row schema.TransformedData
+		if err := job.Next(&row); err != nil {
+			break
+		}
+		transformedData = append(transformedData, row)
+	}
+	return transformedData, nil
 }
 
 func (s *BigQueryStore) Migrate(ctx context.Context) error {
