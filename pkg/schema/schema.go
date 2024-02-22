@@ -20,13 +20,16 @@ type RawData struct {
 }
 
 type TransformedData struct {
-	Time          time.Time `json:"time"`
-	SchemaVersion string    `json:"schema_version"`
-	Onwer         string    `json:"owner"`
-	Project       string    `json:"project"`
-	Service       string    `json:"service"`
-	SKU           string    `json:"sku"`
-	Price         float64   `json:"price"`
-	Quantity      int       `json:"quantity"`
-	Total         float64   `json:"total"`
+	Time              time.Time `json:"time"`
+	SchemaVersion     string    `json:"schema_version"`
+	Onwer             string    `json:"owner"`
+	Project           string    `json:"project"`
+	Service           string    `json:"service"`
+	SKU               string    `json:"sku"`
+	CostAmount        float64   `json:"cost_amount"`
+	CostAmountUnit    string    `json:"cost_amount_unit"`
+	UsageQuantity     float64   `json:"usage_quantity"`
+	UsageQuantityUnit string    `json:"usage_quantity_unit"`
+	ExchangeRate      float64   `json:"exchange_rate"`
+	Total             float64   `json:"total"`
 }
