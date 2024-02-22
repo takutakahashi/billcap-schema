@@ -22,8 +22,10 @@ type RawData struct {
 type TransformedData struct {
 	Time              time.Time `json:"time"`
 	SchemaVersion     string    `json:"schema_version"`
-	Onwer             string    `json:"owner"`
+	Metadata          string    `json:"metadata"`
+	Owner             string    `json:"owner"`
 	Project           string    `json:"project"`
+	Provider          string    `json:"provider"`
 	Service           string    `json:"service"`
 	SKU               string    `json:"sku"`
 	CostAmount        float64   `json:"cost_amount"`
