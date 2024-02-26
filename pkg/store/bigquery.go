@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/takutakahashi/billcap-schema/pkg/schema"
@@ -13,6 +14,7 @@ type BigQueryStore struct {
 }
 
 type BigQueryStoreConfig struct {
+	Client      *bigquery.Client
 	ProjectID   string
 	Raw         BigQueryDatabase
 	Transformed BigQueryDatabase
@@ -24,6 +26,9 @@ type BigQueryDatabase struct {
 }
 
 func NewBigQueryStore(ctx context.Context, cfg BigQueryStoreConfig) (*BigQueryStore, error) {
+	if cfg.Client != nil {
+		return &BigQueryStore{client: cfg.Client, cfg: cfg}, nil
+	}
 	client, err := bigquery.NewClient(ctx, cfg.ProjectID)
 	if err != nil {
 		return nil, err
@@ -32,19 +37,29 @@ func NewBigQueryStore(ctx context.Context, cfg BigQueryStoreConfig) (*BigQuerySt
 }
 
 func (s *BigQueryStore) Load(ctx context.Context, data []schema.RawData) error {
+	if s.cfg.Raw.DatasetID == "" || s.cfg.Raw.TableID == "" {
+		return fmt.Errorf("datasetID and tableID must be set")
+	}
 	inserter := s.client.Dataset(s.cfg.Raw.DatasetID).Table(s.cfg.Raw.DatasetID).Inserter()
 	if err := inserter.Put(ctx, data); err != nil {
 		return err
 	}
 	return nil
-
 }
 
-func (s *BigQueryStore) Transform(ctx context.Context) ([]schema.TransformedData, error) {
-	transformQuery := `
+func (s *BigQueryStore) LoadTransformed(ctx context.Context, data []schema.TransformedData) error {
+	if s.cfg.Transformed.DatasetID == "" || s.cfg.Transformed.TableID == "" {
+		return fmt.Errorf("datasetID and tableID must be set")
+	}
+	inserter := s.client.Dataset(s.cfg.Transformed.DatasetID).Table(s.cfg.Transformed.DatasetID).Inserter()
+	if err := inserter.Put(ctx, data); err != nil {
+		return err
+	}
+	return nil
+}
 
-	`
-	job, err := s.client.Query(transformQuery).Read(ctx)
+func (s *BigQueryStore) Transform(ctx context.Context, query string) ([]schema.TransformedData, error) {
+	job, err := s.client.Query(query).Read(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -60,9 +75,9 @@ func (s *BigQueryStore) Transform(ctx context.Context) ([]schema.TransformedData
 }
 
 func (s *BigQueryStore) Migrate(ctx context.Context) error {
-	return nil
+	panic("not implemented")
 }
 
 func (s *BigQueryStore) Backup(ctx context.Context) error {
-	return nil
+	panic("not implemented")
 }
