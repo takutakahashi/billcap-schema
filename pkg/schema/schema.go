@@ -33,5 +33,6 @@ type TransformedData struct {
 	UsageQuantity     float64   `json:"usage_quantity"`
 	UsageQuantityUnit string    `json:"usage_quantity_unit"`
 	ExchangeRate      float64   `json:"exchange_rate"`
-	Total             float64   `json:"total"`
+	TotalCost         float64   `json:"total_cost"`
+	TotalCostUnit     string    `json:"total_cost_unit"`
 }
